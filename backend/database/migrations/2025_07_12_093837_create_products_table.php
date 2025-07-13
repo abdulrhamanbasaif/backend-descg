@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('name', 255);
+            $table->decimal('price', 10, 2)->nullable();
             $table->string('sku', 100)->unique()->nullable()->comment('Stock Keeping Unit');
             $table->string('category', 100)->nullable();
             $table->text('features')->nullable();

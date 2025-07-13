@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\UserController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -19,3 +21,5 @@ Route::put('/products/{id}', ProductController::class . '@update');
 // Delete product
 Route::delete('/products/{id}', ProductController::class . '@destroy');
 
+// user registration
+route::post('/user', UserController::class . '@register');

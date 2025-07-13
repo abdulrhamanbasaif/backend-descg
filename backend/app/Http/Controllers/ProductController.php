@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use Illuminate\Http\Request; // Add this line
 
 class ProductController extends Controller
@@ -9,35 +10,36 @@ class ProductController extends Controller
     public function index()
     {
         // Logic to retrieve and return a list of products
-        return response()->json([
-            'message' => 'List of products',
-            'products' => [
-                ['id' => 1, 'name' => 'Product 1', 'price' => 100],
-                ['id' => 2, 'name' => 'Product 2', 'price' => 200],
-            ]
-        ]);
+        $products = Product::all();
+        return $products;
     }
 
     public function show($id)
     {
         // Logic to retrieve and return a single product by ID
-        return response()->json([
-            'message' => "Product with id $id",
-            'product' => ['id' => $id, 'name' => "Product $id", 'price' => 100 * $id]
-        ]);
+        $product = Product::find($id);
+        return $product;
     }
 
     public function store( Request $request)
     {
         // Logic to create a new product
          
-        $product = [
-            'id' => rand(3, 1000),
+        $product = Product::create([
+            'user_id' => $request->input('user_id'),
             'name' => $request->input('name'),
             'price' => $request->input('price'),
-        ];
+            'sku' => $request->input('sku'),
+            'category' => $request->input('category'),
+            'features' => $request->input('features'),
+            'keywords' => $request->input('keywords'),
+            'tone' => $request->input('tone'),
+            'length' => $request->input('length'),
+            'final_description' => $request->input('final_description'),
+        ]);
+
         return response()->json([
-            'message' => 'Product created',
+            'message' => 'Product created successfully',
             'product' => $product
         ], 201);
 
@@ -46,23 +48,18 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         // Logic to update an existing product
-        $product = [
-            'id' => (int)$id,
-            'name' => $request->input('name'),
-            'price' => $request->input('price'),
-        ];
-        return response()->json([
-            'message' => 'Product updated',
-            'product' => $product
-        ]);
-
+        $product = Product::find($id);
+        $product->name = $request->input('name');
+        $product->price = $request->input('price');
+        $product->save();
+        return $product;
     }
 
     public function destroy($id)
     {
         // Logic to delete a product
-        return response()->json([
-            'message' => "Product with id $id deleted"
-        ]);
+        $product= Product::find($id);
+        $product->delete();
+        return 'product deleted';
     }
 }
