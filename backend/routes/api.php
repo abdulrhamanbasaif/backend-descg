@@ -22,4 +22,7 @@ Route::put('/products/{id}', ProductController::class . '@update');
 Route::delete('/products/{id}', ProductController::class . '@destroy');
 
 // user registration
-route::post('/user', UserController::class . '@register');
+
+Route::post('/register', UserController::class . '@register');
+
+Route::post('/login', UserController::class . '@login');
