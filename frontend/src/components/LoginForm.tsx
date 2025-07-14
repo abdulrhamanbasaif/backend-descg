@@ -5,7 +5,12 @@ import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Card } from './ui/Card';
 
-export const LoginForm: React.FC = () => {
+
+interface LoginFormProps {
+  onShowSignUp?: () => void;
+}
+
+export const LoginForm: React.FC<LoginFormProps> = ({ onShowSignUp }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -72,6 +77,16 @@ export const LoginForm: React.FC = () => {
 
         <div className="mt-6 text-center text-sm text-gray-500">
           Demo credentials: Use any email and password to continue
+        </div>
+        <div className="mt-2 text-center text-sm">
+          Don't have an account?{' '}
+          <button
+            type="button"
+            className="text-blue-600 hover:underline font-medium"
+            onClick={onShowSignUp}
+          >
+            Sign up here
+          </button>
         </div>
       </Card>
     </div>

@@ -17,8 +17,28 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
   const [formData, setFormData] = useState({
     name: product?.name || '',
     category: product?.category || '',
-    features: product?.features || [],
-    keywords: product?.keywords || [],
+    features: (() => {
+      if (Array.isArray(product?.features)) return product.features;
+      if (typeof product?.features === 'string') {
+        try {
+          return JSON.parse(product.features);
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    })(),
+    keywords: (() => {
+      if (Array.isArray(product?.keywords)) return product.keywords;
+      if (typeof product?.keywords === 'string') {
+        try {
+          return JSON.parse(product.keywords);
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    })(),
     price: product?.price || 0,
     description: product?.description || ''
   });
@@ -72,7 +92,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
   const removeFeature = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      features: prev.features.filter((_, i) => i !== index)
+      features: prev.features.filter((_: string, i: number) => i !== index)
     }));
   };
 
@@ -89,7 +109,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
   const removeKeyword = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      keywords: prev.keywords.filter((_, i) => i !== index)
+      keywords: prev.keywords.filter((_: string, i: number) => i !== index)
     }));
   };
 
@@ -139,7 +159,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
     }
 
     const productData: Product = {
-      id: product?.id || Date.now().toString(),
+      id: product?.id || `temp_${Date.now()}`,
       name: formData.name,
       category: formData.category,
       features: formData.features,
@@ -206,7 +226,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {formData.features.map((feature, index) => (
+            {formData.features.map((feature: string, index: number) => (
               <span
                 key={index}
                 className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
@@ -240,7 +260,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {formData.keywords.map((keyword, index) => (
+            {formData.keywords.map((keyword: string, index: number) => (
               <span
                 key={index}
                 className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
@@ -330,8 +350,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
 
       {/* Actions */}
       <div className="flex gap-4">
-        <Button onClick={handleSave} icon={Save} size="lg">
-          Save Product
+        <Button onClick={handleSave} icon={product ? Edit : Save} size="lg">
+          {product ? 'Update Product' : 'Save Product'}
         </Button>
         <Button onClick={onCancel} variant="outline" size="lg">
           Cancel
