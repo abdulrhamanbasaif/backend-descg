@@ -3,31 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User; // Add this line
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    function register(request $request)
+    function register(Request $request)
     {
         // Logic to register a new user
         $user = User::create([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
-            'password' => $request->input('password')
+            'password' => Hash::make($request->input('password')) // تشفير كلمة المرور
         ]);
 
         return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
-
     }
 
-    function login(request $request)
+    function login(Request $request)
     {
         // Logic to authenticate a user
         $user = User::where('email', $request->input('email'))->first();
-        $pass = hash::check($request->input('password'), $user->password);
 
-        if(!$user&& !$pass) {
+        if (!$user || !Hash::check($request->input('password'), $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
