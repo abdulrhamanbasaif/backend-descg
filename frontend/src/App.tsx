@@ -1,10 +1,14 @@
 import React from 'react';
+
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginForm } from './components/LoginForm';
+import { SignUpForm } from './components/SignUpForm';
 import { Dashboard } from './components/Dashboard';
+
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const [showSignUp, setShowSignUp] = React.useState(false);
 
   if (isLoading) {
     return (
@@ -14,7 +18,9 @@ const AppContent: React.FC = () => {
     );
   }
 
-  return user ? <Dashboard /> : <LoginForm />;
+  if (user) return <Dashboard />;
+  if (showSignUp) return <SignUpForm onSignUpSuccess={() => setShowSignUp(false)} />;
+  return <LoginForm onShowSignUp={() => setShowSignUp(true)} />;
 };
 
 function App() {

@@ -11,7 +11,8 @@ interface ProductListProps {
 }
 
 export const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDelete }) => {
-  if (products.length === 0) {
+  const items: Product[] = Array.isArray(products) ? products : [];
+  if (!items || items.length === 0) {
     return (
       <Card className="text-center py-12">
         <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -25,9 +26,8 @@ export const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDe
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900">Your Products</h2>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
+        {items.map((product) => product && (
           <Card key={product.id} className="relative">
             {product.aiGenerated && (
               <div className="absolute top-4 right-4">
@@ -50,7 +50,10 @@ export const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDe
                 {product.price && (
                   <span className="inline-flex items-center">
                     <DollarSign className="w-3 h-3 mr-1" />
-                    {product.price.toFixed(2)}
+                    {(() => {
+                      const price = typeof product.price === 'number' ? product.price : parseFloat(product.price);
+                      return isNaN(price) ? '0.00' : price.toFixed(2);
+                    })()}
                   </span>
                 )}
               </div>
@@ -61,7 +64,7 @@ export const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDe
                 </p>
               )}
               
-              {product.features.length > 0 && (
+              {Array.isArray(product.features) && product.features.length > 0 && (
                 <div className="mb-3">
                   <div className="flex flex-wrap gap-1">
                     {product.features.slice(0, 3).map((feature, index) => (
@@ -73,7 +76,7 @@ export const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDe
                       </span>
                     ))}
                     {product.features.length > 3 && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500"> 
                         +{product.features.length - 3} more
                       </span>
                     )}
@@ -81,7 +84,7 @@ export const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDe
                 </div>
               )}
               
-              {product.keywords.length > 0 && (
+              {Array.isArray(product.keywords) && product.keywords.length > 0 && (
                 <div className="mb-4">
                   <div className="flex flex-wrap gap-1">
                     {product.keywords.slice(0, 3).map((keyword, index) => (

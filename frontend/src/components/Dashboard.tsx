@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Package, Sparkles, LogOut, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { ProductForm } from './ProductForm';
@@ -10,24 +10,93 @@ import { Product } from '../types';
 export const Dashboard: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<'products' | 'add'>('products');
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const { user, logout } = useAuth();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleProductSave = (product: Product) => {
-    setProducts(prev => {
-      const existingIndex = prev.findIndex(p => p.id === product.id);
-      if (existingIndex >= 0) {
-        const updated = [...prev];
-        updated[existingIndex] = product;
-        return updated;
+  // Helper function to get auth headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  };
+
+  const fetchProducts = () => {
+    setLoading(true);
+    setError(null);
+    fetch('http://localhost:8000/api/products', {
+      headers: getAuthHeaders()
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch products');
+        return res.json();
+      })
+      .then(data => setProducts(data))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleProductSave = async (product: Product) => {
+    setLoading(true);
+    setError(null);
+    try {
+      let response;
+      // Check if it's an existing product (has numeric ID, not temp ID)
+      const isExistingProduct = product.id && !product.id.toString().startsWith('temp_');
+      
+      if (isExistingProduct) {
+        response = await fetch(`http://localhost:8000/api/products/${product.id}`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(product)
+        });
+      } else {
+        response = await fetch('http://localhost:8000/api/products', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(product)
+        }); 
       }
-      return [...prev, product];
-    });
-    setActiveTab('products');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save product');
+      }
+      fetchProducts();
+      setEditingProduct(undefined);
+      setActiveTab('products');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleProductDelete = (productId: string) => {
-    setProducts(prev => prev.filter(p => p.id !== productId));
+  const handleProductDelete = async (productId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`http://localhost:8000/api/products/${productId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) throw new Error('Failed to delete product');
+      fetchProducts();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const safeProducts = products || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -67,15 +136,21 @@ export const Dashboard: React.FC = () => {
         <Card className="mb-8">
           <div className="flex space-x-1">
             <Button
-              onClick={() => setActiveTab('products')}
-              variant={activeTab === 'products' ? 'primary' : 'ghost'}
+              onClick={() => {
+                setEditingProduct(undefined);
+                setActiveTab('products');
+              }}
+              variant={(activeTab === 'products' || editingProduct) ? 'primary' : 'ghost'}
               icon={Package}
             >
-              Products ({products.length})
+              Products ({safeProducts.length}) {editingProduct ? '- Editing' : ''}
             </Button>
             <Button
-              onClick={() => setActiveTab('add')}
-              variant={activeTab === 'add' ? 'primary' : 'ghost'}
+              onClick={() => {
+                setEditingProduct(undefined);
+                setActiveTab('add');
+              }}
+              variant={activeTab === 'add' && !editingProduct ? 'primary' : 'ghost'}
               icon={Plus}
             >
               Add Product
@@ -84,19 +159,32 @@ export const Dashboard: React.FC = () => {
         </Card>
 
         {/* Content */}
-        {activeTab === 'products' ? (
+        {loading ? (
+          <div className="text-center py-8 text-lg text-gray-500">Loading products...</div>
+        ) : error ? (
+          <div className="text-center py-8 text-lg text-red-500">{error}</div>
+        ) : editingProduct ? (
+          <ProductForm
+            product={editingProduct}
+            onSave={handleProductSave}
+            onCancel={() => {
+              setEditingProduct(undefined);
+            }}
+          />
+        ) : activeTab === 'products' ? (
           <ProductList
             products={products}
             onEdit={(product) => {
-              setActiveTab('add');
-              // Pass product to form for editing
+              setEditingProduct(product);
             }}
             onDelete={handleProductDelete}
           />
         ) : (
           <ProductForm
             onSave={handleProductSave}
-            onCancel={() => setActiveTab('products')}
+            onCancel={() => {
+              setActiveTab('products');
+            }}
           />
         )}
       </div>
