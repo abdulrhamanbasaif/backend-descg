@@ -9,11 +9,10 @@ class AiDescriptionLog extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'product_id',
+        'product_id',         
         'generated_text',
         'request_data',
-        'response_data',
-        'created_at',
+        'response_data'
     ];
 
     protected $casts = [
