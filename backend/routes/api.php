@@ -13,7 +13,7 @@ Route::post('/register', [UserController::class, 'register']); // Register new u
 Route::post('/login', [UserController::class, 'login']);       // Login user
 
 // Protected Routes (Require Authentication)
-//Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     // User Info Route
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -33,4 +33,4 @@ Route::post('/login', [UserController::class, 'login']);       // Login user
     Route::put('/ai-description-logs/{id}', [AiDescriptionLogController::class, 'update']);
     Route::delete('/ai-description-logs/{id}', [AiDescriptionLogController::class, 'destroy']);
     Route::post('/ai-description-logs/generate/{id}', [AiDescriptionLogController::class, 'generateDescription']);
-//});
+});

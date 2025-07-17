@@ -28,6 +28,7 @@ class AiDescriptionLogController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
             'generated_text' => 'required|string',
             'request_data' => 'nullable|array',
             'response_data' => 'nullable|array',
@@ -47,6 +48,7 @@ class AiDescriptionLogController extends Controller
             return response()->json(['message' => 'Log not found'], 404);
         }
         $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
             'generated_text' => 'sometimes|string',
             'request_data' => 'sometimes|array',
             'response_data' => 'sometimes|array',

@@ -11,7 +11,7 @@ class GeminiService
     public function __construct()
     {
         $this->apiKey = config('app.gemini_api_key');
-
+        
         if (empty($this->apiKey)) {
             throw new \Exception('GEMINI_API_KEY is not set in the environment variables.');
         }
@@ -25,7 +25,7 @@ class GeminiService
         ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', $data);
 
         if ($response->failed()) {
-            throw new \Exception('Failed to connect to Gemini API: ' . $response->body());
+            throw new \Exception('Failed to connect to Gemini APIUUUUUU: ' . $response->body());
         }
 
         return $response->json();
@@ -48,7 +48,7 @@ class GeminiService
         ]);
 
         if ($response->failed()) {
-            throw new \Exception('Failed to connect to Gemini API: ' . $response->body());
+            throw new \Exception('Failed to connect to Gemini APIDDDDD: ' . $response->body());
         }
 
         return $response->json();
