@@ -9,7 +9,7 @@ RUN npm run build
 # Stage 2: Setup Laravel backend
 FROM php:8.2-fpm-alpine as backend
 
-# Install system deps + PHP extensions correctly
+# Install system deps + PHP extensions
 RUN apk add --no-cache \
     nginx \
     bash \
@@ -34,17 +34,24 @@ RUN sed -i 's|listen = .*|listen = 9000|' /usr/local/etc/php-fpm.d/www.conf
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Copy Laravel backend files
 WORKDIR /var/www/html
 COPY ./backend /var/www/html
 
+# Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Copy built React to Laravel public directory
+# Copy built React frontend into Laravel public directory
 COPY --from=frontend /app/frontend/dist /var/www/html/public
 
+# Copy Nginx config
 COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 
+# Fix permissions for Laravel storage & cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Expose Railway required port
 EXPOSE 8080
 
-# Cache Laravel config at runtime to use Railway's env variables
+# Run Laravel caches + Nginx + PHP-FPM
 CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm -D && nginx -g 'daemon off;'"]
