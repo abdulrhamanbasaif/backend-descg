@@ -34,19 +34,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY ./backend /var/www/html
 
-# Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
-RUN php artisan key:generate
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
 
 # Copy built React to Laravel public directory
 COPY --from=frontend /app/frontend/dist /var/www/html/public
 
-# Nginx Config
 COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+# Cache Laravel config at runtime to use Railway's env variables
+CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm -D && nginx -g 'daemon off;'"]
