@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AiDescriptionLogController;
+use App\Http\Controllers\SallaWebhookController;
+
 
 
 // Auth Routes (Public)
@@ -34,3 +36,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/ai-description-logs/{id}', [AiDescriptionLogController::class, 'destroy']);
     Route::post('/ai-description-logs/generate/{id}', [AiDescriptionLogController::class, 'generateDescription']);
 });
+    Route::post('/salla/webhook', [SallaWebhookController::class, 'handle']);
