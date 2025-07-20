@@ -34,7 +34,7 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 # Copy Laravel backend files
 WORKDIR /var/www/html
-COPY  /var/www/html
+COPY . /var/www/html
 
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
