@@ -5,7 +5,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin -
 
 
 # Stage 2: Laravel backend only
-FROM php:8.2-fpm-alpine AS backend
+FROM php:8.2-fpm-alpine 
 
 # Install system deps + PHP extensions
 RUN apk add --no-cache \
