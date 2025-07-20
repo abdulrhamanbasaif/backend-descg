@@ -25,9 +25,6 @@ RUN apk add --no-cache \
 RUN sed -i 's|listen = .*|listen = 9000|' /usr/local/etc/php-fpm.d/www.conf
 
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
 
 # Copy Laravel backend files
 WORKDIR /var/www/html
