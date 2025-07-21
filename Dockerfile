@@ -49,4 +49,4 @@ COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 EXPOSE 8080
 
 # Start app: Laravel cache + php-fpm + nginx
-CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "php artisan config:clear && php artisan route:clear && php artisan view:clear && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm -D && nginx -g 'daemon off;'"]
