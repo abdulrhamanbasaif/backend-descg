@@ -3,11 +3,10 @@ FROM php:8.2-cli-alpine AS composer
 RUN apk add --no-cache curl
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
-
 # Stage 2: Laravel backend only
-FROM php:8.2-fpm-alpine 
+FROM php:8.2-fpm-alpine
 
-# Install system deps + PHP extensions
+# Install system dependencies and PHP extensions
 RUN apk add --no-cache \
     nginx \
     bash \
@@ -29,24 +28,25 @@ RUN apk add --no-cache \
 # Force php-fpm to listen on TCP port 9000
 RUN sed -i 's|listen = .*|listen = 9000|' /usr/local/etc/php-fpm.d/www.conf
 
-# Install Composer (from previous stage)
+# Copy Composer from first stage
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-# Copy Laravel backend files
+# Set working directory and copy all Laravel files
 WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Copy Nginx config
-COPY ./docker/nginx.conf /etc/nginx/nginx.conf
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Fix permissions
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Copy Nginx configuration
+COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 
 # Expose Railway required port
 EXPOSE 8080
 
-# Run Laravel caches + Nginx + PHP-FPM
+# Start app: Laravel cache + php-fpm + nginx
 CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm -D && nginx -g 'daemon off;'"]
