@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AiDescriptionLogController;
 use App\Http\Controllers\SallaWebhookController;
 
-
+Route::get('/', function () {
+    return 'Laravel is working!';
+});
 
 // Auth Routes (Public)
 Route::post('/register', [UserController::class, 'register']); // Register new user
