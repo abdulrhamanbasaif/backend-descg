@@ -16,6 +16,7 @@ class AiDescriptionLogController extends Controller
         return response()->json($logs);
     }
 
+    
     public function show($id)
     {
         $log = AiDescriptionLog::with('product')->find($id);
